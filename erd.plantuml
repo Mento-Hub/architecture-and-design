@@ -1,0 +1,154 @@
+@startuml
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor White
+  BorderColor Black
+  Shadowing false
+}
+hide circle
+
+entity User {
+  * id : UUID <<PK>>
+  --
+  email : string <<unique>>
+  eed : string <<unique>>
+  password : string
+  name : string
+  job_title : string
+  department : string
+  location : string
+  is_active : boolean
+  created_at : datetime
+}
+
+entity Role {
+  * id : UUID <<PK>>
+  --
+  name : string 
+}
+
+entity BusinessRole{
+  * id : UUID <<PK>>
+  --
+  project_id : UUID <<FK>>
+  name : string 
+  kpis : String
+  evaluationCriteria: JSONB
+}
+
+entity UserRole {
+  * id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  role_id : UUID <<FK>>
+  project_id : UUID <<nullable>>
+}
+
+entity Skill {
+  * id : UUID <<PK>>
+  --
+  name : string <<unique>>
+}
+
+entity UserSkill {
+  * id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  skill_id : UUID <<FK>>
+  type : string <<enum: offered, sought>>
+}
+
+entity SkillEndorsement {
+  * id : UUID <<PK>>
+  --
+  endorsed_by_id : UUID <<FK>>
+  skill_id : UUID <<FK>>
+  endorsed_user_id : UUID <<FK>>
+  created_at : datetime
+}
+
+entity Availability {
+  * id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  day_of_week : string
+  start_time : time
+  end_time : time
+  one_time : boolean
+  date_override : date <<nullable>>
+}
+
+entity Project {
+  * id : UUID <<PK>>
+  --
+  name : string
+  description : text
+}
+
+entity UserBusinessRole {
+  * id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  role_id : UUID <<FK>>
+  business_role_id: UUID <<FK>>
+}
+
+entity Session {
+  * id : UUID <<PK>>
+  --
+  mentor_id : UUID <<FK>>
+  mentee_id : UUID <<FK>>
+  project_id : UUID <<FK>>
+  date : date
+  start_time : time
+  end_time : time
+  status : string <<enum: pending, confirmed, declined, cancelled, completed>>
+  activity_type : string
+  created_at : datetime
+}
+
+entity Feedback {
+  * id : UUID <<PK>>
+  --
+  session_id : UUID <<FK>>
+  given_by_id : UUID <<FK>>
+  given_to_id : UUID <<FK>>
+  rating : int (1–5)
+  comment : text <<nullable>>
+  type : string <<enum: session, final>>
+  created_at : datetime
+}
+
+entity AdminLog {
+  * id : UUID <<PK>>
+  --
+  admin_id : UUID <<FK>>
+  action : string
+  target_user_id : UUID <<nullable>>
+  target_project_id : UUID <<nullable>>
+  created_at : datetime
+}
+
+' Relationships
+User ||--o{ UserRole : has
+Role ||--o{ UserRole : assigns
+Role ||--o{ UserBusinessRole
+User ||--o{ UserSkill
+Skill ||--o{ UserSkill
+User ||--o{ Availability
+User ||--o{ SkillEndorsement : endorsed_by
+User ||--o{ SkillEndorsement : endorsed_user
+Skill ||--o{ SkillEndorsement
+BusinessRole ||--o{ UserBusinessRole
+BusinessRole ||--|| Project
+User ||--o{ UserBusinessRole
+User ||--o{ Session : mentor
+User ||--o{ Session : mentee
+Project ||--o{ Session
+Session ||--o{ Feedback
+User ||--o{ Feedback : given_by
+User ||--o{ Feedback : given_to
+User ||--o{ AdminLog : admin
+User ||--o{ AdminLog : target_user
+Project ||--o{ AdminLog : target_project
+@enduml
