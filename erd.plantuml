@@ -12,12 +12,55 @@ entity User {
   --
   email : string <<unique>>
   eed : string <<unique>>
-  password : string
   name : string
   job_title : string
   department : string
   location : string
   is_active : boolean
+  created_at : datetime
+}
+
+entity UserCredentials {
+  * id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>> <<one-to-one>>
+  employee_number : string <<unique>><<nullable>>
+  personal_email : string <<unique>>
+  password_hash : string
+  is_first_login : boolean
+  temp_password : string <<nullable>>
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity AuthToken {
+  * id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  access_token : text
+  refresh_token : text
+  expires_at : datetime
+  created_at : datetime
+  is_active : boolean
+}
+
+entity PasswordResetToken {
+  * id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  token : string <<unique>>
+  expires_at : datetime
+  is_used : boolean
+  created_at : datetime
+}
+
+entity AuthenticationLog {
+  * id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>><<nullable>>
+  event_type : string <<enum: login_success, login_failed, logout, password_reset>>
+  ip_address : string
+  user_agent : text
   created_at : datetime
 }
 
@@ -27,13 +70,13 @@ entity Role {
   name : string 
 }
 
-entity BusinessRole{
+entity BusinessRole {
   * id : UUID <<PK>>
   --
   project_id : UUID <<FK>>
   name : string 
-  kpis : String
-  evaluationCriteria: JSONB
+  kpis : string
+  evaluationCriteria : JSONB
 }
 
 entity UserRole {
@@ -130,6 +173,11 @@ entity AdminLog {
 }
 
 ' Relationships
+User ||--|| UserCredentials : credentials
+User ||--o{ AuthToken : has
+User ||--o{ PasswordResetToken : has
+User ||--o{ AuthenticationLog : logs
+
 User ||--o{ UserRole : has
 Role ||--o{ UserRole : assigns
 Role ||--o{ UserBusinessRole
