@@ -10,193 +10,135 @@ hide circle
 entity User {
   * id : UUID <<PK>>
   --
-  email : string <<unique>>
-  eed : string <<unique>>
-  name : string
-  job_title : string
-  department : string
-  location : string
-  is_active : boolean
-  created_at : datetime
-}
-
-entity UserCredentials {
-  * id : UUID <<PK>>
-  --
-  user_id : UUID <<FK>> <<one-to-one>>
-  employee_number : string <<unique>><<nullable>>
-  personal_email : string <<unique>>
-  password_hash : string
-  is_first_login : boolean
-  temp_password : string <<nullable>>
-  created_at : datetime
-  updated_at : datetime
-}
-
-entity AuthToken {
-  * id : UUID <<PK>>
-  --
-  user_id : UUID <<FK>>
-  access_token : text
-  refresh_token : text
-  expires_at : datetime
-  created_at : datetime
-  is_active : boolean
-}
-
-entity PasswordResetToken {
-  * id : UUID <<PK>>
-  --
-  user_id : UUID <<FK>>
-  token : string <<unique>>
-  expires_at : datetime
-  is_used : boolean
-  created_at : datetime
-}
-
-entity AuthenticationLog {
-  * id : UUID <<PK>>
-  --
-  user_id : UUID <<FK>><<nullable>>
-  event_type : string <<enum: login_success, login_failed, logout, password_reset>>
-  ip_address : string
-  user_agent : text
-  created_at : datetime
+  * email : string <<unique>>
+  * eed : string <<unique>>
+  * password : string
+  * name : string
+  * job_title : string
+  * department : string
+  * location : string
+  * is_active : boolean
+  * created_at : datetime
 }
 
 entity Role {
   * id : UUID <<PK>>
   --
-  name : string 
-}
-
-entity BusinessRole {
-  * id : UUID <<PK>>
-  --
-  project_id : UUID <<FK>>
-  name : string 
-  kpis : string
-  evaluationCriteria : JSONB
-}
-
-entity UserRole {
-  * id : UUID <<PK>>
-  --
-  user_id : UUID <<FK>>
-  role_id : UUID <<FK>>
-  project_id : UUID <<nullable>>
-}
-
-entity Skill {
-  * id : UUID <<PK>>
-  --
-  name : string <<unique>>
-}
-
-entity UserSkill {
-  * id : UUID <<PK>>
-  --
-  user_id : UUID <<FK>>
-  skill_id : UUID <<FK>>
-  type : string <<enum: offered, sought>>
-}
-
-entity SkillEndorsement {
-  * id : UUID <<PK>>
-  --
-  endorsed_by_id : UUID <<FK>>
-  skill_id : UUID <<FK>>
-  endorsed_user_id : UUID <<FK>>
-  created_at : datetime
-}
-
-entity Availability {
-  * id : UUID <<PK>>
-  --
-  user_id : UUID <<FK>>
-  day_of_week : string
-  start_time : time
-  end_time : time
-  one_time : boolean
-  date_override : date <<nullable>>
+  * name : string
 }
 
 entity Project {
   * id : UUID <<PK>>
   --
-  name : string
-  description : text
+  * name : string
+  * description : text
+  * kpis : String
+  * evaluationCriteria : JSONB
 }
 
-entity UserBusinessRole {
+entity UserProject {
   * id : UUID <<PK>>
   --
-  user_id : UUID <<FK>>
-  role_id : UUID <<FK>>
-  business_role_id: UUID <<FK>>
+  * user_id : UUID <<FK>>
+  * role_id : UUID <<FK>>
+  * project_id : UUID <<FK>>
 }
 
 entity Session {
   * id : UUID <<PK>>
   --
-  mentor_id : UUID <<FK>>
-  mentee_id : UUID <<FK>>
-  project_id : UUID <<FK>>
-  date : date
-  start_time : time
-  end_time : time
-  status : string <<enum: pending, confirmed, declined, cancelled, completed>>
-  activity_type : string
-  created_at : datetime
-}
-
-entity Feedback {
-  * id : UUID <<PK>>
-  --
-  session_id : UUID <<FK>>
-  given_by_id : UUID <<FK>>
-  given_to_id : UUID <<FK>>
-  rating : int (1–5)
-  comment : text <<nullable>>
-  type : string <<enum: session, final>>
-  created_at : datetime
+  * mentor_id : UUID <<FK>>
+  * mentee_id : UUID <<FK>>
+  * project_id : UUID <<FK>>
+  * date : date
+  * start_time : time
+  * end_time : time
+  * status : string <<enum>>
+  * activity_type : string
+  * created_at : datetime
 }
 
 entity AdminLog {
   * id : UUID <<PK>>
   --
-  admin_id : UUID <<FK>>
-  action : string
+  * admin_id : UUID <<FK>>
+  * action : string
   target_user_id : UUID <<nullable>>
   target_project_id : UUID <<nullable>>
-  created_at : datetime
+  * created_at : datetime
 }
 
-' Relationships
-User ||--|| UserCredentials : credentials
-User ||--o{ AuthToken : has
-User ||--o{ PasswordResetToken : has
-User ||--o{ AuthenticationLog : logs
+entity Availability {
+  * id : UUID <<PK>>
+  --
+  * user_id : UUID <<FK>>
+  * day_of_week : string
+  * start_time : time
+  * end_time : time
+  * one_time : boolean
+  date_override : date <<nullable>>
+}
 
-User ||--o{ UserRole : has
-Role ||--o{ UserRole : assigns
-Role ||--o{ UserBusinessRole
-User ||--o{ UserSkill
-Skill ||--o{ UserSkill
-User ||--o{ Availability
-User ||--o{ SkillEndorsement : endorsed_by
-User ||--o{ SkillEndorsement : endorsed_user
-Skill ||--o{ SkillEndorsement
-BusinessRole ||--o{ UserBusinessRole
-BusinessRole ||--|| Project
-User ||--o{ UserBusinessRole
-User ||--o{ Session : mentor
-User ||--o{ Session : mentee
-Project ||--o{ Session
-Session ||--o{ Feedback
-User ||--o{ Feedback : given_by
-User ||--o{ Feedback : given_to
-User ||--o{ AdminLog : admin
-User ||--o{ AdminLog : target_user
-Project ||--o{ AdminLog : target_project
+entity Feedback {
+  * id : UUID <<PK>>
+  --
+  * session_id : UUID <<FK>>
+  * given_by_id : UUID <<FK>>
+  * given_to_id : UUID <<FK>>
+  * rating : int (1-5)
+  comments : text <<nullable>>
+  * type : string <<enum>>
+  * created_at : datetime
+}
+
+entity Skill {
+  * id : UUID <<PK>>
+  --
+  * name : string <<unique>>
+}
+
+entity UserSkill {
+  * id : UUID <<PK>>
+  --
+  * user_id : UUID <<FK>>
+  * skill_id : UUID <<FK>>
+  * type : string <<enum>>
+}
+
+entity SkillEndorsement {
+  * id : UUID <<PK>>
+  --
+  * endorsed_by_id : UUID <<FK>>
+  * skill_id : UUID <<FK>>
+  * endorsed_user_id : UUID <<FK>>
+  * created_at : datetime
+}
+
+' Relationships with crow's foot notation
+
+User ||--o{ UserProject : "participates in"
+Project ||--o{ UserProject : "has participants"
+Role ||--o{ UserProject : "in project"
+
+User ||--o{ Session : "mentors"
+User ||--o{ Session : "is mentored"
+Project ||--o{ Session : "has sessions"
+
+User ||--o{ AdminLog : "performs"
+User ||--o| AdminLog : "targeted by"
+Project ||--o| AdminLog : "targeted by"
+
+User ||--o{ Availability : "has"
+
+Session ||--o{ Feedback : "receives"
+User ||--o{ Feedback : "gives"
+User ||--o{ Feedback : "receives"
+
+User ||--o{ UserSkill : "has"
+Skill ||--o{ UserSkill : "possessed by"
+
+User ||--o{ SkillEndorsement : "endorses"
+User ||--o{ SkillEndorsement : "endorsed"
+Skill ||--o{ SkillEndorsement : "endorsed"
+
 @enduml
